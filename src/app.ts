@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import { databaseService } from './shared/database_service';
 import { Constants } from './shared/constants';
 
@@ -12,8 +11,8 @@ const syncedServicesConfigRoutes = require('./routes/synced_services_config');
 
 const app = express();
 
-// enable cors 9mazbe in the future replace with only t2t client's ip
-app.use(cors());
+// do not enable cors, client should be able to connect anyway
+// app.use(cors());
 
 app.use('/api/registration', registrationRoutes);
 app.use('/api/authentication', authenticationRoutes);

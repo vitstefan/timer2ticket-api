@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import { validate } from 'class-validator';
 import { UserAuthentication } from '../models/user_authentication';
 import { UserToClient } from '../models/user_to_client';
-import { AuthConfig } from '../config/auth.config';
+import { Constants } from '../shared/constants';
 
 const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: false }));
@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
     req.body['username'],
     req.body['password'],
   );
-  
+
   const validationResults = await validate(user);
 
   if (validationResults.length !== 0) {
@@ -51,7 +51,7 @@ router.post('/', async (req, res) => {
       {
         id: userFromDB._id,
       },
-      AuthConfig.secret,
+      Constants.jwtSecret,
       {
         expiresIn: 21600, // 6 hours
       });

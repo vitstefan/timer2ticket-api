@@ -5,5 +5,7 @@ export class Constants {
 
   static mongoDbUrl = process.env.MONGODB_URL || 'mongodb://localhost:27017';
 
+  static jwtSecret = process.env.JWT_SECRET || '5G9awA6G7P5Z3U74Iu5sA412Gyj';
+
   static bcryptSaltRounds = 10;
 }

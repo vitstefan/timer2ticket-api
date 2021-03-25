@@ -4,9 +4,9 @@ import jwt from 'jsonwebtoken';
 import cron from 'node-cron';
 import { databaseService } from '../shared/database_service';
 import { UserToClient } from '../models/user_to_client';
-import { AuthConfig } from '../config/auth.config';
 import { UserFromClient } from '../models/user_from_client';
 import { validate } from 'class-validator';
+import { Constants } from '../shared/constants';
 
 const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: false }));
@@ -27,7 +27,7 @@ router.use((req, res, next) => {
   const token = Array.isArray(tokenFromHeader) ? tokenFromHeader[0] : tokenFromHeader;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  jwt.verify(token, AuthConfig.secret, (err: any, decoded: any) => {
+  jwt.verify(token, Constants.jwtSecret, (err: any, decoded: any) => {
     if (err) {
       return res.sendStatus(401);
     }

@@ -2,7 +2,6 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { databaseService } from '../shared/database_service';
 import jwt from 'jsonwebtoken';
-import { AuthConfig } from '../config/auth.config';
 import superagent from 'superagent';
 import { Constants } from '../shared/constants';
 
@@ -25,7 +24,7 @@ router.use((req, res, next) => {
   const token = Array.isArray(tokenFromHeader) ? tokenFromHeader[0] : tokenFromHeader;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  jwt.verify(token, AuthConfig.secret, (err: any, decoded: any) => {
+  jwt.verify(token, Constants.jwtSecret, (err: any, decoded: any) => {
     if (err) {
       return res.sendStatus(401);
     }

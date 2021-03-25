@@ -1,8 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken';
-import { AuthConfig } from '../config/auth.config';
 import superagent from 'superagent';
+import { Constants } from '../shared/constants';
 
 const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: false }));
@@ -23,7 +23,7 @@ router.use((req, res, next) => {
   const token = Array.isArray(tokenFromHeader) ? tokenFromHeader[0] : tokenFromHeader;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  jwt.verify(token, AuthConfig.secret, (err: any, decoded: any) => {
+  jwt.verify(token, Constants.jwtSecret, (err: any, decoded: any) => {
     if (err) {
       return res.status(401).send('invalid access token');
     }
@@ -48,9 +48,13 @@ router.get('/redmine_time_entry_activities', async (req, res) => {
   }
 
   // add last / if not provided by user
-  redmineApiPoint = redmineApiPoint.endsWith('/') ? redmineApiPoint : `${redmineApiPoint}/`;
+  redmineApiPoint = redmineApiPoint.endsWith('/')
+    ? redmineApiPoint
+    : `${redmineApiPoint}/`;
   // add https:// if not provided by user
-  redmineApiPoint = (redmineApiPoint.startsWith('https://') || redmineApiPoint.startsWith('http://')) ? redmineApiPoint : `https://${redmineApiPoint}`;
+  redmineApiPoint = (redmineApiPoint.startsWith('https://') || redmineApiPoint.startsWith('http://'))
+    ? redmineApiPoint
+    : `https://${redmineApiPoint}`;
 
   const responseTimeEntryActivities = await superagent
     .get(`${redmineApiPoint}enumerations/time_entry_activities.json`)
@@ -66,13 +70,11 @@ router.get('/redmine_time_entry_activities', async (req, res) => {
         // do not send 401, it would lead to user logout on the client side due to error intercepting
         statusCode = 400;
       }
-      
+
       return res.sendStatus(statusCode);
     });
 
   // need to grab userId (determined by api key provided)
-  // https://projects.jagu.cz/users/current.json {user: {id: 144}}
-
   const responseUserDetail = await superagent
     .get(`${redmineApiPoint}users/current.json`)
     .accept('application/json')

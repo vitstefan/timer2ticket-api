@@ -1,12 +1,12 @@
-import { Constants } from './constants';
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
-import { User } from '../models/user';
+import { User } from "../../src/models/user";
+import { Constants } from "../../src/shared/constants";
 
-export class DatabaseService {
-  private static _mongoDbName = process.env.DB_NAME || 'timer2ticketDB';
+export class DatabaseServiceMock {
+  private static _mongoDbName = process.env.DB_NAME || 'timer2ticketDB-test';
   private static _usersCollectionName = 'users';
 
-  private static _instance: DatabaseService;
+  private static _instance: DatabaseServiceMock;
 
   private _mongoClient: MongoClient | undefined;
   private _db: Db | undefined;
@@ -16,7 +16,7 @@ export class DatabaseService {
   private _isReady = false;
   isReady = (): boolean => this._isReady;
 
-  public static get Instance(): DatabaseService {
+  public static get Instance(): DatabaseServiceMock {
     return this._instance || (this._instance = new this());
   }
 
@@ -34,18 +34,17 @@ export class DatabaseService {
     this._mongoClient = new MongoClient(Constants.mongoDbUrl, { useUnifiedTopology: true });
 
     await this._mongoClient.connect();
-    console.log("Connected to MongoDB!");
 
     if (!this._mongoClient) return false;
 
-    this._db = this._mongoClient.db(DatabaseService._mongoDbName);
+    this._db = this._mongoClient.db(DatabaseServiceMock._mongoDbName);
 
-    this._usersCollection = this._db.collection(DatabaseService._usersCollectionName);
+    this._usersCollection = this._db.collection(DatabaseServiceMock._usersCollectionName);
 
     return true;
   }
 
-  private _close() {
+  public close(): void {
     this._mongoClient?.close();
   }
 
@@ -82,6 +81,11 @@ export class DatabaseService {
     const result = await this._usersCollection.replaceOne(filterQuery, user);
     return result.result.ok === 1 ? result.ops[0] : null;
   }
+
+  async wipeAllData(): Promise<boolean> {
+    const result = await this._usersCollection?.deleteMany({});
+    return result?.result.ok === 1;
+  }
 }
 
-export const databaseService = DatabaseService.Instance;
+export const databaseServiceMock = DatabaseServiceMock.Instance;

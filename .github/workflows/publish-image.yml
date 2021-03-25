@@ -15,7 +15,7 @@ jobs:
       - uses: actions/upload-artifact@main
         with:
           name: webpack artifacts
-          path: dist/
+          path: dist/src/
 
   build-and-push-image:
     runs-on: ubuntu-latest

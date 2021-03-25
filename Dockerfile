@@ -9,4 +9,4 @@ WORKDIR /app
 
 RUN npm install --production && npm run build
 
-CMD [ "node", "./dist/app.js" ]
+CMD [ "node", "./dist/src/app.js" ]

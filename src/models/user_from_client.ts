@@ -1,7 +1,6 @@
 import { IsEmail, IsDate, IsMongoId, IsIn, IsOptional, ValidateNested, } from 'class-validator';
 import { ObjectId } from "mongodb";
 import { JobDefinition } from "./job_definition";
-import { Mapping } from "./mapping/mapping";
 import { ServiceDefinition } from "./service_definition/service_definition";
 import { User } from "./user";
 
@@ -29,9 +28,6 @@ export class UserFromClient {
   @ValidateNested({ each: true })
   serviceDefinitions: ServiceDefinition[];
 
-  // cannot be changed here, do not validate at all
-  mappings: Mapping[];
-
   // is already validated before method is called by JWT mechanism
   token: string;
 
@@ -43,7 +39,6 @@ export class UserFromClient {
     this.configSyncJobDefinition = user.configSyncJobDefinition;
     this.timeEntrySyncJobDefinition = user.timeEntrySyncJobDefinition;
     this.serviceDefinitions = user.serviceDefinitions;
-    this.mappings = user.mappings;
 
     this.token = token;
   }

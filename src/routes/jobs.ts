@@ -34,6 +34,92 @@ router.use((req, res, next) => {
   });
 });
 
+router.post('/schedule_config_job/:userId([a-zA-Z0-9]{24})', async (req, res) => {
+  const userId = req.params.userId;
+  const token = res.locals.token;
+
+  // authorize if userId from JWT is the same as in userId param
+  if (!res.locals.userIdFromToken || !userId || !token) {
+    return res.sendStatus(400);
+  }
+
+  if (res.locals.userIdFromToken !== userId) {
+    return res.sendStatus(401);
+  }
+
+  const user = await databaseService.getUserById(userId);
+
+  if (!user) {
+    return res.sendStatus(404);
+  }
+
+  try {
+    const response = await superagent
+      .post(`${Constants.t2tCoreUrl}schedule_config_job/${user._id}`)
+      .send({})
+      .on('error', (err) => {
+        let statusCode = 503;
+        if (err && err.status) {
+          statusCode = err.status
+        }
+
+        return res.status(statusCode).send({ scheduled: false });
+      });
+
+    if (response.ok) {
+      // + change status => 'active'
+      console.log('Config job scheduled');
+      return res.send({ scheduled: true });
+    }
+  } catch (ex) {
+    // t2t core api errors already handled in .on callback above
+    // this handles only edge cases => should not happen
+  }
+});
+
+router.post('/schedule_time_entries_job/:userId([a-zA-Z0-9]{24})', async (req, res) => {
+  const userId = req.params.userId;
+  const token = res.locals.token;
+
+  // authorize if userId from JWT is the same as in userId param
+  if (!res.locals.userIdFromToken || !userId || !token) {
+    return res.sendStatus(400);
+  }
+
+  if (res.locals.userIdFromToken !== userId) {
+    return res.sendStatus(401);
+  }
+
+  const user = await databaseService.getUserById(userId);
+
+  if (!user) {
+    return res.sendStatus(404);
+  }
+
+  try {
+    const response = await superagent
+      .post(`${Constants.t2tCoreUrl}schedule_time_entries_job/${user._id}`)
+      .send({})
+      .on('error', (err) => {
+        let statusCode = 503;
+        if (err && err.status) {
+          statusCode = err.status
+        }
+
+        return res.status(statusCode).send({ scheduled: false });
+      });
+
+    if (response.ok) {
+      // + change status => 'active'
+      console.log('Time entries job scheduled');
+      return res.send({ scheduled: true });
+    }
+  } catch (ex) {
+    // t2t core api errors already handled in .on callback above
+    // this handles only edge cases => should not happen
+  }
+});
+
 router.post('/start/:userId([a-zA-Z0-9]{24})', async (req, res) => {
   const userId = req.params.userId;
   const token = res.locals.token;

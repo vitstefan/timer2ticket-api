@@ -1,5 +1,4 @@
 import * as chai from 'chai';
-import request from 'superagent';
 import superagent from 'superagent';
 import { UserAuthentication } from '../src/models/user_authentication';
 import { UserRegistration } from '../src/models/user_registration';

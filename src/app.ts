@@ -8,6 +8,7 @@ const authenticationRoutes = require('./routes/authentication');
 const usersRoutes = require('./routes/users');
 const jobsRoutes = require('./routes/jobs');
 const syncedServicesConfigRoutes = require('./routes/synced_services_config');
+const jobLogsRoutes = require('./routes/job_logs');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/api/authentication', authenticationRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/jobs', jobsRoutes);
 app.use('/api/synced_services_config', syncedServicesConfigRoutes);
+app.use('/api/job_logs', jobLogsRoutes);
 
 app.listen(Constants.appPort, async () => {
   await databaseService.init();

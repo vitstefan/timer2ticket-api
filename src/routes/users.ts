@@ -59,7 +59,6 @@ router.get('/:userId([a-zA-Z0-9]{24})', async (req, res) => {
     return res.sendStatus(404);
   }
 
-  // no content 204, conflict 409, bad request 400, not found 404, unauthorized 401, forbidden 403
   return res.send(new UserToClient(user, token));
 });
 

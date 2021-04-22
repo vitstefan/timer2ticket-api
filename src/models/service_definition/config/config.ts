@@ -1,6 +1,12 @@
-import { IsOptional, IsUrl, } from 'class-validator';
+import { IsOptional, IsUrl, IsDefined, IsNumber } from 'class-validator';
 
 export class Config {
+  /**
+   * shared
+   */
+  @IsDefined()
+  @IsNumber()
+  userId!: number;
   /**
    * below Toggl specific
    */
@@ -13,8 +19,6 @@ export class Config {
   apiPoint?: string | null;
 
   defaultTimeEntryActivity?: DefaultTimeEntryActivity | null;
-
-  userId?: number;
 }
 
 class Workspace {

@@ -154,8 +154,14 @@ router.get('/toggl_track_workspaces', async (req, res) => {
         }
       );
     });
+    
+    // extract userId
+    const userId = response.body['data']['id'];
 
-    return res.send(workspaces);
+    return res.send({
+      user_id: userId,
+      workspaces: workspaces,
+    });
   } catch (ex) {
     return res.sendStatus(503);
   }

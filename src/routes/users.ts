@@ -2,11 +2,13 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken';
 import cron from 'node-cron';
+import bcrypt from 'bcrypt';
 import { databaseService } from '../shared/database_service';
 import { UserToClient } from '../models/user_to_client';
 import { UserFromClient } from '../models/user_from_client';
 import { validate } from 'class-validator';
 import { Constants } from '../shared/constants';
+import { UserChangePassword } from '../models/user_change_password';
 
 const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: false }));
@@ -122,6 +124,80 @@ router.put('/:userId([a-zA-Z0-9]{24})', async (req, res) => {
   if (updatedUser) {
     return res.send(new UserToClient(updatedUser, token));
   } else {
+    return res.sendStatus(503);
+  }
+});
+
+/**
+ * Changes user's password
+ */
+router.post('/change_password/:userId([a-zA-Z0-9]{24})', async (req, res) => {
+  const userId = req.params?.userId;
+  const token = res.locals?.token;
+
+  if (!res.locals.userIdFromToken
+    || !userId || !token
+    || !req.body['oldPassword']
+    || !req.body['newPassword']
+    || !req.body['newPasswordAgain']) {
+    return res.sendStatus(400);
+  }
+
+  const userChangePassword = new UserChangePassword(
+    req.body['oldPassword'],
+    req.body['newPassword'],
+    req.body['newPasswordAgain'],
+  );
+
+  if (!userChangePassword) {
+    return res.sendStatus(400);
+  }
+
+  // authorize if userId from JWT is the same as in userId param
+  if (res.locals.userIdFromToken !== userId) {
+    return res.sendStatus(401);
+  }
+
+  // validate user from client object
+  const validationResults = await validate(userChangePassword);
+
+  if (validationResults.length !== 0 || userChangePassword.newPassword != userChangePassword.newPasswordAgain) {
+    return res.sendStatus(400);
+  }
+
+  const user = await databaseService.getUserById(userId);
+  console.log(user);
+  console.log(userId);
+
+  if (!user) {
+    return res.sendStatus(404);
+  }
+
+  try {
+    // Check old password's validity
+    const isValid = await bcrypt.compare(userChangePassword.oldPassword, user.passwordHash);
+
+    if (!isValid) {
+      // Cannot send 401 since it would force the client to logout
+      return res.sendStatus(400);
+    }
+
+    // generate new password hash
+    const hash = await bcrypt.hash(userChangePassword.newPassword, Constants.bcryptSaltRounds);
+
+    // change password hash
+    user.passwordHash = hash;
+
+    // store in DB
+    const updatedUser = await databaseService.updateUser(user);
+
+    if (updatedUser) {
+      return res.send(new UserToClient(updatedUser, token));
+    } else {
+      return res.sendStatus(503);
+    }
+  } catch (error) {
+    console.log(error);
     return res.sendStatus(503);
   }
 });
